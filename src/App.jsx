@@ -25,6 +25,9 @@ function App() {
 const [cards , setCards] = useState([]) 
 const [flippedCards , setFlippedCards] = useState([])
 const [matchedCards , setMatchedCards] = useState([])
+const [score , setScore] = useState(0)
+const [moves , setMoves] = useState(0)
+const [islocked , setIsLocked] = useState(false)
 
 
 function initializeGame () {
@@ -37,6 +40,11 @@ isMatched:false
   }))
   
   setCards(finalCards)
+  setFlippedCards([])
+  setMatchedCards([])
+  setScore(0)
+  setMoves(0)
+  setIsLocked(false)
 }
 
 useEffect(() => {
@@ -44,7 +52,7 @@ useEffect(() => {
 },[])
 
 function handleClick (card) {
-  if(card.isFlipped || card.isMatched){
+  if(card.isFlipped || card.isMatched || islocked){
     return
   }
 
@@ -60,10 +68,13 @@ function handleClick (card) {
 setFlippedCards((prev) => [...prev,card.id])
 
 if(flippedCards.length === 1) {
+  setIsLocked(true)
   const firstCard = cards.find(c => c.id === flippedCards[0])
 
   if(firstCard.value === card.value){
     setTimeout(() => {
+      setScore((prev) => prev+1)
+
       setMatchedCards((prev) => [...prev,firstCard.id,card.id])
       
       setCards((prev) => 
@@ -75,16 +86,32 @@ if(flippedCards.length === 1) {
         }
       })
       )
+      setIsLocked(false)
 setFlippedCards([])
     },500)
+  }else{
+    setTimeout(() => {
+      const flippedBackCards = newCards.map((c) => {
+        if(flippedCards.includes(c.id) || c.id===card.id){
+          return{...c,isFlipped:false}
+        }else{
+          return c
+        }
+      })
+      setCards(flippedBackCards)
+      setIsLocked(false)
+      setFlippedCards([])
+    },1000)
   }
 }
+
+setMoves((prev) => prev +1)
 }
 
   return (
    <div className="app">
 
-    <GameHeader score={3} moves={10}/>
+    <GameHeader score={score} moves={moves} onReset={initializeGame}/>
     
     <div className="cards-grid">{
       cards.map((card) => (
