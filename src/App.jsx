@@ -23,6 +23,9 @@ const CardValues = [
 
 function App() {
 const [cards , setCards] = useState([]) 
+const [flippedCards , setFlippedCards] = useState([])
+const [matchedCards , setMatchedCards] = useState([])
+
 
 function initializeGame () {
 
@@ -54,6 +57,28 @@ function handleClick (card) {
   })
   
   setCards(newCards)
+setFlippedCards((prev) => [...prev,card.id])
+
+if(flippedCards.length === 1) {
+  const firstCard = cards.find(c => c.id === flippedCards[0])
+
+  if(firstCard.value === card.value){
+    setTimeout(() => {
+      setMatchedCards((prev) => [...prev,firstCard.id,card.id])
+      
+      setCards((prev) => 
+      prev.map((c) => {
+        if(c.id === card.id || c.id === firstCard.id){
+          return{...c,isMatched:true}
+        }else{
+          return c
+        }
+      })
+      )
+setFlippedCards([])
+    },500)
+  }
+}
 }
 
   return (
